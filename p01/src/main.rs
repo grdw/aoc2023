@@ -61,16 +61,16 @@ fn resolve(input: &'static str, matches: HashMap<&'static str, u16>) -> u16 {
         let mut l = "";
         let mut r = "";
 
-        for k in matches.keys() {
-            for (fi, fv) in line.match_indices(k) {
+        for key in matches.keys() {
+            for (fi, _) in line.match_indices(key) {
                 if fi < li {
                     li = fi;
-                    l = fv;
+                    l = key;
                 }
 
                 if fi >= ri {
                     ri = fi;
-                    r = fv;
+                    r = key;
                 }
             }
         }
