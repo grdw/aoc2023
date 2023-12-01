@@ -1,36 +1,25 @@
 use std::fs;
 use std::collections::HashMap;
 
-const RADIX: u32 = 10;
-
 fn main() {
     println!("The answer to part1 is: {}", part1("input"));
     println!("The answer to part2 is: {}", part2("input"))
 }
 
 fn part1(input: &'static str) -> u16 {
-    let s = fs::read_to_string(input).unwrap();
-    return s.split_terminator("\n").map(|line| {
-        let mut l = ' ';
-        let mut r = ' ';
-        let lc = line.as_bytes();
+    let matches = HashMap::from([
+        ("1", 1),
+        ("2", 2),
+        ("3", 3),
+        ("4", 4),
+        ("5", 5),
+        ("6", 6),
+        ("7", 7),
+        ("8", 8),
+        ("9", 9),
+    ]);
 
-        for i in 0..line.len() {
-            let c = lc[i] as char;
-            let d = lc[lc.len() - 1 - i] as char;
-
-            if c.is_digit(RADIX) && l == ' ' {
-                l = c;
-            }
-
-            if d.is_digit(RADIX) && r == ' ' {
-                r = d;
-            }
-        }
-
-        let t = format!("{}{}", l, r);
-        t.parse::<u16>().unwrap()
-    }).sum::<u16>()
+    return resolve(input, matches)
 }
 
 #[test]
@@ -39,7 +28,6 @@ fn test_part1() {
 }
 
 fn part2(input: &'static str) -> u16 {
-    let s = fs::read_to_string(input).unwrap();
     let matches = HashMap::from([
         ("1", 1),
         ("2", 2),
@@ -60,6 +48,12 @@ fn part2(input: &'static str) -> u16 {
         ("eight", 8),
         ("nine", 9),
     ]);
+
+    return resolve(input, matches)
+}
+
+fn resolve(input: &'static str, matches: HashMap<&'static str, u16>) -> u16 {
+    let s = fs::read_to_string(input).unwrap();
 
     return s.split_terminator("\n").map(|line| {
         let mut li = line.len();
