@@ -76,7 +76,7 @@ fn resolve(input: &'static str, matches: HashMap<&'static str, u16>) -> u16 {
         }
 
         (matches[l] * 10) + matches[r]
-    }).sum::<u16>()
+    }).sum()
 }
 
 #[test]
