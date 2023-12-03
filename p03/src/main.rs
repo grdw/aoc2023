@@ -68,7 +68,7 @@ fn part2(grid: &Grid) -> u32 {
         }
     }
 
-    return t
+    t
 }
 
 #[test]
@@ -84,21 +84,21 @@ fn parse(input: &'static str) -> Grid {
     let f = fs::read_to_string(input).unwrap();
     let re = Regex::new(r"[0-9]+|[^0-9\.]").unwrap();
 
-    for (y, s) in f.split_terminator("\n").enumerate() {
+    for (y, s) in f.split_terminator('\n').enumerate() {
         for m in re.find_iter(s) {
             match m.as_str().parse::<u32>() {
                 Ok(n) => {
                     grid.numbers.push(Number {
-                        n: n,
-                        y: y,
+                        n,
+                        y,
                         x: (m.start()..m.end())
                     });
                 },
                 Err(_) => {
                     grid.specials.push(Special {
-                        y: y,
+                        y,
                         x: m.start(),
-                        c: m.as_str().chars().nth(0).unwrap()
+                        c: m.as_str().chars().next().unwrap()
                     });
                 }
             }
