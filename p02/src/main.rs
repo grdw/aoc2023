@@ -24,7 +24,7 @@ fn parse(file: &'static str) -> Vec<Game> {
     let contents = fs::read_to_string(file).unwrap();
     let re = Regex::new(r"Game (-?\d+): (.+)").unwrap();
 
-    contents.split_terminator("\n").map(|line| {
+    contents.split_terminator('\n').map(|line| {
         let caps = re.captures(line).unwrap();
         let hands: Vec<ElfHand> = caps[2]
             .split_terminator("; ")
@@ -36,7 +36,7 @@ fn parse(file: &'static str) -> Vec<Game> {
                 };
 
                 for s in hand.split_terminator(", ") {
-                    let cubes: Vec<&str> = s.split(" ").collect();
+                    let cubes: Vec<&str> = s.split(' ').collect();
                     let n = cubes[0].parse::<u32>().unwrap();
                     let m = cubes[1];
 
@@ -52,7 +52,7 @@ fn parse(file: &'static str) -> Vec<Game> {
 
         Game {
             id: caps[1].parse::<u16>().unwrap(),
-            hands: hands
+            hands
         }
     }).collect()
 }
@@ -63,7 +63,7 @@ fn test_parse() {
     assert_eq!(parse("test_input").len(), 5)
 }
 
-fn part1(games: &Vec<Game>, red: u32, green: u32, blue: u32) -> u16 {
+fn part1(games: &[Game], red: u32, green: u32, blue: u32) -> u16 {
     return games
         .iter()
         .filter(|g| {
@@ -102,7 +102,7 @@ fn part2(games: &Vec<Game>) -> u32 {
 
         t += max_hand.red * max_hand.green * max_hand.blue
     }
-    return t
+    t
 }
 
 #[test]
