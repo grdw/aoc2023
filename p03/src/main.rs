@@ -19,6 +19,17 @@ struct Special {
     y: usize
 }
 
+impl Special {
+    fn is_match(&self, n: &Number) -> bool {
+        let by = self.y == n.y || self.y + 1 == n.y || self.y - 1 == n.y;
+        let bx = n.x.contains(&self.x) ||
+                 n.x.contains(&(self.x + 1)) ||
+                 n.x.contains(&(self.x - 1));
+
+        bx && by
+    }
+}
+
 fn main() {
     let grid = parse("input");
     println!("Part 1: {:?}", part1(&grid));
@@ -28,16 +39,7 @@ fn main() {
 fn part1(grid: &Grid) -> u32 {
     grid.numbers
         .iter()
-        .filter(|n| {
-            grid.specials.iter().any(|s| {
-                let by = s.y == n.y || s.y + 1 == n.y || s.y - 1 == n.y;
-                let bx = n.x.contains(&s.x) ||
-                         n.x.contains(&(s.x + 1)) ||
-                         n.x.contains(&(s.x - 1));
-
-                bx && by
-            })
-        })
+        .filter(|n| grid.specials.iter().any(|s| s.is_match(n)))
         .map(|n| n.n)
         .sum()
 }
@@ -56,12 +58,7 @@ fn part2(grid: &Grid) -> u32 {
     for s in &grid.specials {
         let mut numbers = vec![];
         for n in &grid.numbers {
-            let by = s.y == n.y || s.y + 1 == n.y || s.y - 1 == n.y;
-            let bx = n.x.contains(&s.x) ||
-                     n.x.contains(&(s.x + 1)) ||
-                     n.x.contains(&(s.x - 1));
-
-            if bx && by && s.c == '*' {
+            if s.is_match(n) && s.c == '*' {
                 numbers.push(n.n);
             }
         };
