@@ -91,12 +91,12 @@ fn parse(input: &'static str) -> Grid {
         for (x, c) in line.expect("").chars().enumerate() {
             if rang.contains(&c) {
                 result.push(c);
-            } else if result.len() > 1 {
+            } else if !result.is_empty() {
                 let n = result.parse::<u32>().unwrap();
                 let x = (x-result.len())..x;
 
                 grid.numbers.push(Number { y, x, n });
-                result = String::new();
+                result.clear();
             }
 
             if c != '.' && !rang.contains(&c) {
