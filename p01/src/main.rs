@@ -19,7 +19,7 @@ fn part1(input: &'static str) -> u16 {
         ("9", 9),
     ]);
 
-    return resolve(input, matches)
+    resolve(input, matches)
 }
 
 #[test]
@@ -49,13 +49,13 @@ fn part2(input: &'static str) -> u16 {
         ("nine", 9),
     ]);
 
-    return resolve(input, matches)
+    resolve(input, matches)
 }
 
 fn resolve(input: &'static str, matches: HashMap<&'static str, u16>) -> u16 {
     let s = fs::read_to_string(input).unwrap();
 
-    return s.split_terminator("\n").map(|line| {
+    return s.split_terminator('\n').map(|line| {
         let mut li = line.len();
         let mut ri = 0;
         let mut l = "";
