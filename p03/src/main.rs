@@ -87,20 +87,16 @@ fn parse(input: &'static str) -> Grid {
     for (y, s) in f.split_terminator('\n').enumerate() {
         for m in re.find_iter(s) {
             match m.as_str().parse::<u32>() {
-                Ok(n) => {
-                    grid.numbers.push(Number {
-                        n,
-                        y,
-                        x: (m.start()..m.end())
-                    });
-                },
-                Err(_) => {
-                    grid.specials.push(Special {
-                        y,
-                        x: m.start(),
-                        c: m.as_str().chars().next().unwrap()
-                    });
-                }
+                Ok(n) => grid.numbers.push(Number {
+                    n,
+                    y,
+                    x: (m.start()..m.end())
+                }),
+                Err(_) => grid.specials.push(Special {
+                    y,
+                    x: m.start(),
+                    c: m.as_str().chars().next().unwrap()
+                })
             }
         }
     }
