@@ -95,7 +95,7 @@ fn parse(input: &'static str) -> Grid {
                 let n = result.parse::<u32>().unwrap();
                 let x = (x-result.len())..x;
 
-                grid.numbers.push(Number {y, x, n});
+                grid.numbers.push(Number { y, x, n });
                 result = String::new();
             }
 
