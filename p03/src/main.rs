@@ -1,5 +1,5 @@
-use regex::Regex;
-use std::fs;
+use std::fs::File;
+use std::io::{BufReader, BufRead};
 use std::ops::Range;
 
 struct Grid {
@@ -81,22 +81,26 @@ fn test_part2() {
 
 fn parse(input: &'static str) -> Grid {
     let mut grid = Grid { numbers: vec![], specials: vec![] };
-    let f = fs::read_to_string(input).unwrap();
-    let re = Regex::new(r"[0-9]+|[^0-9\.]").unwrap();
+    let file = File::open(input).unwrap();
+    let reader = BufReader::new(file);
+    let rang = '0'..='9';
 
-    for (y, s) in f.split_terminator('\n').enumerate() {
-        for m in re.find_iter(s) {
-            match m.as_str().parse::<u32>() {
-                Ok(n) => grid.numbers.push(Number {
-                    n,
-                    y,
-                    x: (m.start()..m.end())
-                }),
-                Err(_) => grid.specials.push(Special {
-                    y,
-                    x: m.start(),
-                    c: m.as_str().chars().next().unwrap()
-                })
+    for (y, line) in reader.lines().enumerate() {
+        let mut result = String::new();
+
+        for (x, c) in line.expect("").chars().enumerate() {
+            if rang.contains(&c) {
+                result.push(c);
+            } else if result.len() > 1 {
+                let n = result.parse::<u32>().unwrap();
+                let x = (x-result.len())..x;
+
+                grid.numbers.push(Number {y, x, n});
+                result = String::new();
+            }
+
+            if c != '.' && !rang.contains(&c) {
+                grid.specials.push(Special { y, x, c });
             }
         }
     }
