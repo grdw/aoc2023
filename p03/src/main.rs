@@ -14,6 +14,7 @@ struct Number {
 }
 
 struct Special {
+    c: char,
     x: usize,
     y: usize
 }
@@ -21,6 +22,7 @@ struct Special {
 fn main() {
     let grid = parse("input");
     println!("Part 1: {:?}", part1(&grid));
+    println!("Part 2: {:?}", part2(&grid));
 }
 
 fn part1(grid: &Grid) -> u32 {
@@ -33,7 +35,7 @@ fn part1(grid: &Grid) -> u32 {
                          n.x.contains(&(s.x + 1)) ||
                          n.x.contains(&(s.x - 1));
 
-             bx && by
+                bx && by
             })
         })
         .map(|n| n.n)
@@ -46,6 +48,38 @@ fn test_part1() {
     let n = part1(&grid);
 
     assert_eq!(n, 4361);
+}
+
+fn part2(grid: &Grid) -> u32 {
+    let mut t = 0;
+
+    for s in &grid.specials {
+        let mut numbers = vec![];
+        for n in &grid.numbers {
+            let by = s.y == n.y || s.y + 1 == n.y || s.y - 1 == n.y;
+            let bx = n.x.contains(&s.x) ||
+                     n.x.contains(&(s.x + 1)) ||
+                     n.x.contains(&(s.x - 1));
+
+            if bx && by && s.c == '*' {
+                numbers.push(n.n);
+            }
+        };
+
+        if numbers.len() == 2 {
+            t += numbers[0] * numbers[1]
+        }
+    }
+
+    return t
+}
+
+#[test]
+fn test_part2() {
+    let grid = parse("test_input");
+    let n = part2(&grid);
+
+    assert_eq!(n, 467835);
 }
 
 fn parse(input: &'static str) -> Grid {
@@ -66,7 +100,8 @@ fn parse(input: &'static str) -> Grid {
                 Err(_) => {
                     grid.specials.push(Special {
                         y: y,
-                        x: m.start()
+                        x: m.start(),
+                        c: m.as_str().chars().nth(0).unwrap()
                     });
                 }
             }
