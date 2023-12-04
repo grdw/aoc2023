@@ -1,6 +1,6 @@
 use std::fs::File;
 use std::io::{BufReader, BufRead};
-use std::ops::Range;
+use std::collections::HashMap;
 
 #[derive(Debug)]
 struct Card {
@@ -19,7 +19,7 @@ fn part1(cards: &[Card]) -> u32 {
     cards.iter().map(|card| {
         let mut n = 0;
         for w in &card.winning_numbers {
-            if card.my_numbers.contains(&w) {
+            if card.my_numbers.contains(w) {
                 // if ugly, then ugly
                 if n == 0 {
                     n = 1
@@ -41,8 +41,28 @@ fn test_part1() {
     assert_eq!(n, 13);
 }
 
-fn part2(card: &[Card]) -> u32 {
-    return 0
+fn part2(cards: &[Card]) -> u32 {
+    let mut copies = HashMap::new();
+
+    for card in cards {
+        copies.insert(card.id, 1);
+    }
+
+    for card in cards {
+        for _ in 0..copies[&card.id] {
+            let mut n = 0;
+            for w in &card.winning_numbers {
+                if card.my_numbers.contains(w) {
+                    n += 1;
+                    if let Some(t) = copies.get_mut(&(card.id + n)) {
+                        *t += 1
+                    }
+                }
+            }
+        }
+    }
+
+    copies.values().sum()
 }
 
 #[test]
@@ -50,7 +70,7 @@ fn test_part2() {
     let cards = parse("test_input");
     let n = part2(&cards);
 
-    assert_eq!(n, 1);
+    assert_eq!(n, 30);
 }
 
 fn to_u16_vec(string: &str) -> Vec<u16> {
