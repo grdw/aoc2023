@@ -49,12 +49,13 @@ fn part2(cards: &[Card]) -> u32 {
     }
 
     for card in cards {
-        let mut n = 0;
+        let mut n = card.id;
         let c = copies[&card.id];
+
         for w in &card.winning_numbers {
             if card.my_numbers.contains(w) {
                 n += 1;
-                if let Some(t) = copies.get_mut(&(card.id + n)) {
+                if let Some(t) = copies.get_mut(&n) {
                     *t += c
                 }
             }
