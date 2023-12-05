@@ -141,6 +141,7 @@ fn parse(input: &'static str) -> Almanac {
                         t: p[0]-p[1]
                     }
                 )
+            }
         } else {
             let (n, _) = l.split_once(" ").unwrap();
             let (from, to) = n.split_once("-to-").unwrap();
