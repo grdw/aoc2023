@@ -8,6 +8,7 @@ struct Translation {
     source_range: Range<i64>,
     t: i64
 }
+
 #[derive(Debug)]
 struct SourceMap {
     to: String,
@@ -63,6 +64,7 @@ fn main() {
 
 fn part1(almanac: &Almanac) -> i64 {
     let mut min = i64::MAX;
+
     for seed in &almanac.seeds {
         let mut key = "seed";
         let mut value = *seed;
@@ -78,7 +80,8 @@ fn part1(almanac: &Almanac) -> i64 {
             min = value
         }
     }
-    return min
+
+    min
 }
 
 #[test]
@@ -131,16 +134,17 @@ fn parse(input: &'static str) -> Almanac {
 
         if l.chars().next().unwrap().is_numeric() {
             let p = to_i64_vec(&l);
-            let t = Translation {
-                source_range: p[1]..p[1]+p[2],
-                t: p[0]-p[1]
-            };
             if let Some(map) = almanac.maps.get_mut(&key) {
-                map.translations.push(t)
-            }
+                map.translations.push(
+                    Translation {
+                        source_range: p[1]..p[1]+p[2],
+                        t: p[0]-p[1]
+                    }
+                )
         } else {
             let (n, _) = l.split_once(" ").unwrap();
             let (from, to) = n.split_once("-to-").unwrap();
+
             key = String::from(from);
             almanac.maps.insert(key.clone(), SourceMap::new(to));
         }
