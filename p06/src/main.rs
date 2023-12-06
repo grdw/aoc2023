@@ -34,9 +34,10 @@ fn test_part2() {
 fn parse(input: &'static str) -> Vec<Race> {
     let mut races: Vec<Race> = vec![];
     let d = fs::read_to_string(input).unwrap();
-    for (i, l) in d.split_terminator("\n").enumerate() {
+    for l in d.split_terminator("\n") {
         for (x, d) in l.split_whitespace().enumerate() {
             if x < 1 { continue }
+
             let index = x - 1;
             let v = d.parse::<u16>().unwrap();
 
@@ -44,10 +45,7 @@ fn parse(input: &'static str) -> Vec<Race> {
                 Some(race) => { race.distance = v },
                 None => races.insert(
                     index,
-                    Race {
-                        time: v,
-                        distance: 0
-                    }
+                    Race { time: v, distance: 0 }
                 )
             }
         }
