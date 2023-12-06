@@ -31,7 +31,7 @@ impl SourceMap {
 }
 
 #[test]
-fn test_source_map() {
+fn test_source_map_get() {
     let sm = SourceMap {
         to: String::from("soil"),
         translations: vec![
@@ -53,6 +53,7 @@ fn test_source_map() {
 #[derive(Debug)]
 struct Almanac {
     seeds: Vec<i64>,
+    seed_ranges: Vec<Range<i64>>,
     maps: HashMap<String, SourceMap>
 }
 
@@ -93,7 +94,27 @@ fn test_part1() {
 }
 
 fn part2(almanac: &Almanac) -> i64 {
-    return 0
+    let mut min = i64::MAX;
+    for seed_range in &almanac.seed_ranges {
+
+        println!("{:?}", seed_range);
+        for s in seed_range.start..seed_range.end {
+            let mut key = "seed";
+            let mut value = s;
+
+            while key != "location" {
+                let map = &almanac.maps[key];
+
+                value = map.get(value);
+                key = map.to.as_str();
+            }
+
+            if value < min {
+                min = value
+            }
+        }
+    }
+    return min
 }
 
 #[test]
@@ -101,7 +122,7 @@ fn test_part2() {
     let almanac = parse("test_input");
     let n = part2(&almanac);
 
-    assert_eq!(n, 1);
+    assert_eq!(n, 46);
 }
 
 fn to_i64_vec(s: &str) -> Vec<i64> {
@@ -111,9 +132,10 @@ fn to_i64_vec(s: &str) -> Vec<i64> {
 }
 
 fn parse(input: &'static str) -> Almanac {
-    let mut seeds = vec![];
-    let mut maps = HashMap::new();
-    let mut almanac = Almanac { seeds, maps };
+    let seeds = vec![];
+    let seed_ranges = vec![];
+    let maps = HashMap::new();
+    let mut almanac = Almanac { seeds, seed_ranges, maps };
     let mut key = String::new();
     let file = File::open(input).unwrap();
     let mut lines = BufReader::new(file).lines();
@@ -121,8 +143,14 @@ fn parse(input: &'static str) -> Almanac {
     if let Some(l) = lines.next() {
         let line = l.unwrap();
         let (_, s) = line.split_once(" ").unwrap();
+        let seeds = to_i64_vec(s);
 
-        almanac.seeds = to_i64_vec(s);
+        almanac.seeds = seeds.clone();
+
+        for i in 0..(seeds.len() / 2) {
+            let j = i * 2;
+            almanac.seed_ranges.push(seeds[j]..seeds[j] + seeds[j + 1])
+        }
     }
 
     for line in lines {
