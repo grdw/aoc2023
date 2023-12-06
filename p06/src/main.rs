@@ -23,6 +23,22 @@ fn part1(races: &[Race]) -> u64 {
     races.iter().map(|r| r.resolve()).product()
 }
 
+#[test]
+fn test_part1() {
+    let (races, _) = parse("test_input");
+    assert_eq!(part1(&races), 288)
+}
+
+fn part2(race: &Race) -> u64 {
+    race.resolve()
+}
+
+#[test]
+fn test_part2() {
+    let (_, race) = parse("test_input");
+    assert_eq!(part2(&race), 71503)
+}
+
 fn parse(input: &'static str) -> (Vec<Race>, Race) {
     let mut race = Race { time: 0, distance: 0 };
     let mut races: Vec<Race> = vec![];
@@ -55,23 +71,6 @@ fn parse(input: &'static str) -> (Vec<Race>, Race) {
         }
     }
     (races, race)
-}
-
-
-#[test]
-fn test_part1() {
-    let (races, _) = parse("test_input");
-    assert_eq!(part1(&races), 288)
-}
-
-fn part2(race: &Race) -> u64 {
-    race.resolve()
-}
-
-#[test]
-fn test_part2() {
-    let (_, race) = parse("test_input");
-    assert_eq!(part2(&race), 71503)
 }
 
 #[test]
