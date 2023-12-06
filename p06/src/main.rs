@@ -34,6 +34,7 @@ fn test_part2() {
 fn parse(input: &'static str) -> Vec<Race> {
     let mut races: Vec<Race> = vec![];
     let d = fs::read_to_string(input).unwrap();
+
     for l in d.split_terminator("\n") {
         for (x, d) in l.split_whitespace().enumerate() {
             if x < 1 { continue }
