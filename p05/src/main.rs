@@ -114,7 +114,7 @@ fn part2(almanac: &Almanac) -> i64 {
             }
         }
     }
-    return min
+    min
 }
 
 #[test]
@@ -142,7 +142,7 @@ fn parse(input: &'static str) -> Almanac {
 
     if let Some(l) = lines.next() {
         let line = l.unwrap();
-        let (_, s) = line.split_once(" ").unwrap();
+        let (_, s) = line.split_once(' ').unwrap();
         let seeds = to_i64_vec(s);
 
         almanac.seeds = seeds.clone();
@@ -156,7 +156,7 @@ fn parse(input: &'static str) -> Almanac {
     for line in lines {
         let l = line.unwrap();
 
-        if l == "" {
+        if l.is_empty() {
             continue
         }
 
@@ -171,7 +171,7 @@ fn parse(input: &'static str) -> Almanac {
                 )
             }
         } else {
-            let (n, _) = l.split_once(" ").unwrap();
+            let (n, _) = l.split_once(' ').unwrap();
             let (from, to) = n.split_once("-to-").unwrap();
 
             key = String::from(from);
