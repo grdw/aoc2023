@@ -28,7 +28,7 @@ fn parse(input: &'static str) -> Vec<Race> {
     let mut races: Vec<Race> = vec![];
     let d = fs::read_to_string(input).unwrap();
 
-    for l in d.split_terminator("\n") {
+    for l in d.split_terminator('\n') {
         for (x, d) in l.split_whitespace().enumerate() {
             if x < 1 { continue }
 
@@ -62,9 +62,9 @@ fn parse_race(input: &'static str) -> Race {
     let mut race = Race { time: 0, distance: 0 };
     let d = fs::read_to_string(input).unwrap();
 
-    for l in d.split_terminator("\n") {
-        let (name, ns) = l.split_once(":").unwrap();
-        let n = ns.replace(" ", "");
+    for l in d.split_terminator('\n') {
+        let (name, ns) = l.split_once(':').unwrap();
+        let n = ns.replace(' ', "");
         let v = n.parse::<u64>().unwrap();
 
         match name {
