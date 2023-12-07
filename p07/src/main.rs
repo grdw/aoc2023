@@ -5,9 +5,9 @@ use std::collections::HashMap;
 
 fn main() {
     let mut hands = parse("input");
-    hands.sort_by(|a, b| a.compare(b));
+    hands.sort_by(|a, b| a.compare(b, false));
     println!("p1: {:?}", part1(&hands));
-    hands.sort_by(|a, b| a.compare_with_joker(b));
+    hands.sort_by(|a, b| a.compare(b, true));
     println!("p2: {:?}", part1(&hands));
 }
 
@@ -21,9 +21,10 @@ const SCORE: &'static str = "23456789TJQKA";
 const JSCORE: &'static str = "J23456789TQKA";
 
 impl Hand {
-    fn compare(&self, hand: &Hand) -> Ordering {
-        let x = self.score(false);
-        let y = hand.score(false);
+    fn compare(&self, hand: &Hand, jokers: bool) -> Ordering {
+        let x = self.score(jokers);
+        let y = hand.score(jokers);
+        let score = if jokers { JSCORE } else { SCORE };
 
         if x > y {
             Ordering::Greater
@@ -33,33 +34,8 @@ impl Hand {
             let mut h = hand.cards.chars();
             for c in self.cards.chars() {
                 let d = h.next().unwrap();
-                let c_score = SCORE.find(c);
-                let d_score = SCORE.find(d);
-
-                if c_score > d_score {
-                    return Ordering::Greater
-                } else if c_score < d_score {
-                    return Ordering::Less
-                }
-            }
-            panic!("Impossible")
-        }
-    }
-
-    fn compare_with_joker(&self, hand: &Hand) -> Ordering {
-        let x = self.score(true);
-        let y = hand.score(true);
-
-        if x > y {
-            Ordering::Greater
-        } else if x < y {
-            Ordering::Less
-        } else {
-            let mut h = hand.cards.chars();
-            for c in self.cards.chars() {
-                let d = h.next().unwrap();
-                let c_score = JSCORE.find(c);
-                let d_score = JSCORE.find(d);
+                let c_score = score.find(c);
+                let d_score = score.find(d);
 
                 if c_score > d_score {
                     return Ordering::Greater
@@ -72,20 +48,6 @@ impl Hand {
     }
 
     fn score(&self, jokers: bool) -> u8 {
-        let hand_type = self.hand_type(jokers);
-        let hand_types = HashMap::from([
-            ("five_of_a_kind", 7),
-            ("four_of_a_kind", 6),
-            ("full_house", 5),
-            ("three_of_a_kind", 4),
-            ("two_pair", 3),
-            ("one_pair", 2),
-            ("high_card", 1)
-        ]);
-        hand_types[hand_type]
-    }
-
-    fn hand_type(&self, jokers: bool) -> &str {
         let mut map = HashMap::new();
         for c in self.cards.chars() {
             let e = map.entry(c).or_insert(0);
@@ -108,22 +70,22 @@ impl Hand {
         }
 
         if count_map.get(&5) == Some(&1) {
-            return "five_of_a_kind"
+            return 7
         } else if count_map.get(&4) == Some(&1) {
-            return "four_of_a_kind"
+            return 6
         } else if count_map.get(&3) == Some(&1) &&
                   count_map.get(&2) == Some(&1) {
-            return "full_house"
+            return 5
         } else if count_map.get(&3) == Some(&1) {
-            return "three_of_a_kind"
+            return 4
         } else if count_map.get(&2) == Some(&2) {
-            return "two_pair"
+            return 3
         } else if count_map.get(&2) == Some(&1) {
-            return "one_pair"
+            return 2
         } else if count_map.get(&1) == Some(&5) {
-            return "high_card"
+            return 1
         } else {
-            return "five_of_a_kind"
+            return 7
         }
     }
 }
@@ -144,123 +106,11 @@ fn max_k_v(map: &HashMap<char, u64>) -> char {
     *max_k
 }
 
-
-#[test]
-fn test_card_type() {
-    let high_card = Hand { cards: String::from("23456"), bet: 0};
-    assert_eq!(high_card.hand_type(false), "high_card");
-    let one_pair = Hand { cards: String::from("A23A4"), bet: 0};
-    assert_eq!(one_pair.hand_type(false), "one_pair");
-    let two_pair = Hand { cards: String::from("23432"), bet: 0};
-    assert_eq!(two_pair.hand_type(false), "two_pair");
-    let three_oak = Hand { cards: String::from("FFF89"), bet: 0};
-    assert_eq!(three_oak.hand_type(false), "three_of_a_kind");
-    let full_house = Hand { cards: String::from("FFF99"), bet: 0};
-    assert_eq!(full_house.hand_type(false), "full_house");
-    let four_oak = Hand { cards: String::from("FFFF9"), bet: 0};
-    assert_eq!(four_oak.hand_type(false), "four_of_a_kind");
-    let five_oak = Hand { cards: String::from("FFFFF"), bet: 0};
-    assert_eq!(five_oak.hand_type(false), "five_of_a_kind");
-}
-
-#[test]
-fn test_card_type_with_joker() {
-    let high_card = Hand { cards: String::from("23456"), bet: 0};
-    assert_eq!(high_card.hand_type(true), "high_card");
-    let one_pair = Hand { cards: String::from("A23A4"), bet: 0};
-    assert_eq!(one_pair.hand_type(true), "one_pair");
-    let two_pair = Hand { cards: String::from("23432"), bet: 0};
-    assert_eq!(two_pair.hand_type(true), "two_pair");
-    let three_oak = Hand { cards: String::from("FFF89"), bet: 0};
-    assert_eq!(three_oak.hand_type(true), "three_of_a_kind");
-    let full_house = Hand { cards: String::from("FFF99"), bet: 0};
-    assert_eq!(full_house.hand_type(true), "full_house");
-    let four_oak = Hand { cards: String::from("FFFF9"), bet: 0};
-    assert_eq!(four_oak.hand_type(true), "four_of_a_kind");
-    let five_oak = Hand { cards: String::from("FFFFF"), bet: 0};
-    assert_eq!(five_oak.hand_type(true), "five_of_a_kind");
-    let j_one_pair = Hand { cards: String::from("A23J4"), bet: 0};
-    assert_eq!(j_one_pair.hand_type(true), "one_pair");
-    let j_two_pair = Hand { cards: String::from("2J432"), bet: 0};
-    assert_eq!(j_two_pair.hand_type(true), "three_of_a_kind");
-    let j_three_oak = Hand { cards: String::from("FJJ89"), bet: 0};
-    assert_eq!(j_three_oak.hand_type(true), "three_of_a_kind");
-    let j_full_house = Hand { cards: String::from("FFFJJ"), bet: 0};
-    assert_eq!(j_full_house.hand_type(true), "five_of_a_kind");
-    let j_four_oak = Hand { cards: String::from("JJJ98"), bet: 0};
-    assert_eq!(j_four_oak.hand_type(true), "four_of_a_kind");
-    let j_five_oak = Hand { cards: String::from("JJJJJ"), bet: 0};
-    assert_eq!(j_five_oak.hand_type(true), "five_of_a_kind");
-}
-
-#[test]
-fn test_joker_card() {
-    let a = Hand { cards: String::from("JJJJJ"), bet: 0};
-    assert_eq!(a.score(true), 7);
-    let b = Hand { cards: String::from("8JJJJ"), bet: 0};
-    assert_eq!(b.score(true), 7);
-    let c = Hand { cards: String::from("87JJJ"), bet: 0};
-    assert_eq!(c.score(true), 6);
-    let d = Hand { cards: String::from("88JJJ"), bet: 0};
-    assert_eq!(d.score(true), 7);
-    let e = Hand { cards: String::from("888JJ"), bet: 0};
-    assert_eq!(e.score(true), 7);
-    let f = Hand { cards: String::from("8888J"), bet: 0};
-    assert_eq!(f.score(true), 7);
-    let g = Hand { cards: String::from("1234J"), bet: 0};
-    assert_eq!(g.score(true), 2);
-    let h = Hand { cards: String::from("1244J"), bet: 0};
-    assert_eq!(h.score(true), 4);
-    let i = Hand { cards: String::from("1444J"), bet: 0};
-    assert_eq!(i.score(true), 6);
-    let j = Hand { cards: String::from("123JJ"), bet: 0};
-    assert_eq!(j.score(true), 4);
-    let k = Hand { cards: String::from("122JJ"), bet: 0};
-    assert_eq!(k.score(true), 6);
-}
-
-#[test]
-fn test_compare_card() {
-    let hcardx = Hand { cards: String::from("23456"), bet: 0};
-    let hcardy = Hand { cards: String::from("73456"), bet: 0};
-    assert_eq!(hcardx.compare(&hcardy), Ordering::Less);
-
-    let fcardx = Hand { cards: String::from("33332"), bet: 0};
-    let fcardy = Hand { cards: String::from("2AAAA"), bet: 0};
-    assert_eq!(fcardx.compare(&fcardy), Ordering::Greater);
-
-    let tcardx = Hand { cards: String::from("KK677"), bet: 0};
-    let tcardy = Hand { cards: String::from("KTJJT"), bet: 0};
-    assert_eq!(tcardx.compare(&tcardy), Ordering::Greater);
-
-    let ucardx = Hand { cards: String::from("KK677"), bet: 0};
-    let ucardy = Hand { cards: String::from("KTJJT"), bet: 0};
-    assert_eq!(ucardx.compare(&ucardy), Ordering::Greater);
-
-    let vcardx = Hand { cards: String::from("T55J5"), bet: 0};
-    let vcardy = Hand { cards: String::from("QQQJA"), bet: 0};
-    assert_eq!(vcardx.compare(&vcardy), Ordering::Less)
-}
-
 fn part1(hands: &[Hand]) -> u64 {
     hands
         .iter()
         .enumerate().map(|(i, h)| h.bet * (i + 1) as u64)
         .sum()
-}
-
-#[test]
-fn test_part1() {
-    let mut hands = parse("test_input");
-    hands.sort_by(|a, b| a.compare(b));
-
-    assert_eq!(part1(&hands), 6440);
-
-    hands.sort_by(|a, b| a.compare_with_joker(b));
-    for h in &hands {
-        println!("{:?}", h);
-    }
-    assert_eq!(part1(&hands), 5905);
 }
 
 fn parse(input: &'static str) -> Vec<Hand> {
@@ -281,4 +131,89 @@ fn parse(input: &'static str) -> Vec<Hand> {
     }
 
     hands
+}
+
+#[test]
+fn test_compare_card() {
+    let hcardx = Hand { cards: String::from("23456"), bet: 0};
+    let hcardy = Hand { cards: String::from("73456"), bet: 0};
+    assert_eq!(hcardx.compare(&hcardy, false), Ordering::Less);
+
+    let fcardx = Hand { cards: String::from("33332"), bet: 0};
+    let fcardy = Hand { cards: String::from("2AAAA"), bet: 0};
+    assert_eq!(fcardx.compare(&fcardy, false), Ordering::Greater);
+
+    let tcardx = Hand { cards: String::from("KK677"), bet: 0};
+    let tcardy = Hand { cards: String::from("KTJJT"), bet: 0};
+    assert_eq!(tcardx.compare(&tcardy, false), Ordering::Greater);
+
+    let ucardx = Hand { cards: String::from("KK677"), bet: 0};
+    let ucardy = Hand { cards: String::from("KTJJT"), bet: 0};
+    assert_eq!(ucardx.compare(&ucardy, false), Ordering::Greater);
+
+    let vcardx = Hand { cards: String::from("T55J5"), bet: 0};
+    let vcardy = Hand { cards: String::from("QQQJA"), bet: 0};
+    assert_eq!(vcardx.compare(&vcardy, false), Ordering::Less)
+}
+
+#[test]
+fn test_part1() {
+    let mut hands = parse("test_input");
+    hands.sort_by(|a, b| a.compare(b, false));
+
+    assert_eq!(part1(&hands), 6440);
+
+    hands.sort_by(|a, b| a.compare(b, true));
+    for h in &hands {
+        println!("{:?}", h);
+    }
+    assert_eq!(part1(&hands), 5905);
+}
+
+#[test]
+fn test_card_type_with_joker() {
+    let high_card = Hand { cards: String::from("23456"), bet: 0};
+    assert_eq!(high_card.score(true), 1);
+    let one_pair = Hand { cards: String::from("A23A4"), bet: 0};
+    assert_eq!(one_pair.score(true), 2);
+    let two_pair = Hand { cards: String::from("23432"), bet: 0};
+    assert_eq!(two_pair.score(true), 3);
+    let three_oak = Hand { cards: String::from("FFF89"), bet: 0};
+    assert_eq!(three_oak.score(true), 4);
+    let full_house = Hand { cards: String::from("FFF99"), bet: 0};
+    assert_eq!(full_house.score(true), 5);
+    let four_oak = Hand { cards: String::from("FFFF9"), bet: 0};
+    assert_eq!(four_oak.score(true), 6);
+    let five_oak = Hand { cards: String::from("FFFFF"), bet: 0};
+    assert_eq!(five_oak.score(true), 7);
+    let j_one_pair = Hand { cards: String::from("A23J4"), bet: 0};
+    assert_eq!(j_one_pair.score(true), 2);
+    let j_two_pair = Hand { cards: String::from("2J432"), bet: 0};
+    assert_eq!(j_two_pair.score(true), 4);
+    let j_three_oak = Hand { cards: String::from("FJJ89"), bet: 0};
+    assert_eq!(j_three_oak.score(true), 4);
+    let j_full_house = Hand { cards: String::from("FFFJJ"), bet: 0};
+    assert_eq!(j_full_house.score(true), 7);
+    let j_four_oak = Hand { cards: String::from("JJJ98"), bet: 0};
+    assert_eq!(j_four_oak.score(true), 6);
+    let j_five_oak = Hand { cards: String::from("JJJJJ"), bet: 0};
+    assert_eq!(j_five_oak.score(true), 7);
+}
+
+#[test]
+fn test_card_type() {
+    let high_card = Hand { cards: String::from("23456"), bet: 0};
+    assert_eq!(high_card.score(false), 1);
+    let one_pair = Hand { cards: String::from("A23A4"), bet: 0};
+    assert_eq!(one_pair.score(false), 2);
+    let two_pair = Hand { cards: String::from("23432"), bet: 0};
+    assert_eq!(two_pair.score(false), 3);
+    let three_oak = Hand { cards: String::from("FFF89"), bet: 0};
+    assert_eq!(three_oak.score(false), 4);
+    let full_house = Hand { cards: String::from("FFF99"), bet: 0};
+    assert_eq!(full_house.score(false), 5);
+    let four_oak = Hand { cards: String::from("FFFF9"), bet: 0};
+    assert_eq!(four_oak.score(false), 6);
+    let five_oak = Hand { cards: String::from("FFFFF"), bet: 0};
+    assert_eq!(five_oak.score(false), 7);
 }
