@@ -17,8 +17,8 @@ struct Hand {
     bet: u64
 }
 
-const SCORE: &'static str = "23456789TJQKA";
-const JSCORE: &'static str = "J23456789TQKA";
+const SCORE: &str = "23456789TJQKA";
+const JSCORE: &str = "J23456789TQKA";
 
 impl Hand {
     fn compare(&self, hand: &Hand, jokers: bool) -> Ordering {
@@ -64,13 +64,13 @@ impl Hand {
         }
 
         let mut count_map = HashMap::new();
-        for (_, v) in &map {
+        for v in map.values() {
             let e = count_map.entry(v).or_insert(0);
             *e += 1;
         }
 
         if count_map.get(&5) == Some(&1) {
-            return 7
+            7
         } else if count_map.get(&4) == Some(&1) {
             return 6
         } else if count_map.get(&3) == Some(&1) &&
