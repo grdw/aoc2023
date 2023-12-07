@@ -102,23 +102,18 @@ fn part1(hands: &[Hand]) -> u64 {
 }
 
 fn parse(input: &'static str) -> Vec<Hand> {
-    let mut hands = vec![];
     let file = File::open(input).unwrap();
     let lines = BufReader::new(file).lines();
 
-    for line in lines {
+    lines.map(|line| {
         let l = line.unwrap();
         let (hand, bet) = l.split_once(' ').unwrap();
 
-        hands.push(
-            Hand {
-                cards: String::from(hand),
-                bet: bet.parse::<u64>().unwrap()
-            }
-        )
-    }
-
-    hands
+        Hand {
+            cards: String::from(hand),
+            bet: bet.parse::<u64>().unwrap()
+        }
+    }).collect()
 }
 
 #[test]
