@@ -53,10 +53,9 @@ impl Hand {
 
         if jokers {
             let max_k = highest_non_joker_card(&map);
-            let js = *map.get(&'J').unwrap_or(&0);
+            let js = map.remove(&'J').unwrap_or(0);
 
             map.entry(max_k).and_modify(|n| *n += js);
-            map.remove(&'J');
         }
 
         let mut v: Vec<&u64> = map.values().collect();
