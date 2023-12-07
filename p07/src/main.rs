@@ -22,14 +22,14 @@ const JSCORE: &str = "J23456789TQKA";
 
 impl Hand {
     fn compare(&self, hand: &Hand, jokers: bool) -> Ordering {
-        let score = if jokers { JSCORE } else { SCORE };
-        let c = self.score(jokers).cmp(&hand.score(jokers));
+        let hand_cmp = self.score(jokers).cmp(&hand.score(jokers));
 
-        if c != Ordering::Equal {
-            return c
+        if hand_cmp != Ordering::Equal {
+            return hand_cmp
         }
 
         let mut h = hand.cards.chars();
+        let score = if jokers { JSCORE } else { SCORE };
 
         for c in self.cards.chars() {
             let d = h.next().unwrap();
@@ -40,7 +40,7 @@ impl Hand {
             }
         }
 
-        panic!("Impossible")
+        panic!("That's the same card dummy ;)")
     }
 
     fn score(&self, jokers: bool) -> u8 {
