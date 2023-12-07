@@ -22,79 +22,67 @@ const JSCORE: &str = "J23456789TQKA";
 
 impl Hand {
     fn compare(&self, hand: &Hand, jokers: bool) -> Ordering {
-        let x = self.score(jokers);
-        let y = hand.score(jokers);
         let score = if jokers { JSCORE } else { SCORE };
+        let c = self.score(jokers).cmp(&hand.score(jokers));
 
-        if x > y {
-            Ordering::Greater
-        } else if x < y {
-            Ordering::Less
-        } else {
-            let mut h = hand.cards.chars();
-            for c in self.cards.chars() {
-                let d = h.next().unwrap();
-                let c_score = score.find(c);
-                let d_score = score.find(d);
-
-                if c_score > d_score {
-                    return Ordering::Greater
-                } else if c_score < d_score {
-                    return Ordering::Less
-                }
-            }
-            panic!("Impossible")
+        if c != Ordering::Equal {
+            return c
         }
+
+        let mut h = hand.cards.chars();
+
+        for c in self.cards.chars() {
+            let d = h.next().unwrap();
+            let cmp = score.find(c).cmp(&score.find(d));
+
+            if cmp != Ordering::Equal {
+                return cmp
+            }
+        }
+
+        panic!("Impossible")
     }
 
     fn score(&self, jokers: bool) -> u8 {
         let mut map = HashMap::new();
+
         for c in self.cards.chars() {
             let e = map.entry(c).or_insert(0);
             *e += 1
         }
 
         if jokers {
-            let max_k = max_k_v(&map);
-            let js = get_joker_count(&map);
+            let max_k = highest_non_joker_card(&map);
+            let js = *map.get(&'J').unwrap_or(&0);
             if let Some(n) = map.get_mut(&max_k) {
                 *n += js
             }
             map.remove(&'J');
         }
 
-        let mut count_map = HashMap::new();
-        for v in map.values() {
-            let e = count_map.entry(v).or_insert(0);
-            *e += 1;
-        }
+        let mut v: Vec<&u64> = map.values().collect();
+        v.sort();
 
-        if count_map.get(&5) == Some(&1) {
-            7
-        } else if count_map.get(&4) == Some(&1) {
-            return 6
-        } else if count_map.get(&3) == Some(&1) &&
-                  count_map.get(&2) == Some(&1) {
-            return 5
-        } else if count_map.get(&3) == Some(&1) {
-            return 4
-        } else if count_map.get(&2) == Some(&2) {
-            return 3
-        } else if count_map.get(&2) == Some(&1) {
-            return 2
-        } else if count_map.get(&1) == Some(&5) {
-            return 1
-        } else {
-            return 7
+        let signature: String = v
+            .iter()
+            .map(|n| char::from_digit(**n as u32, 10).unwrap())
+            .collect();
+
+        match signature.as_str() {
+            "5"     => 7,
+            "14"    => 6,
+            "23"    => 5,
+            "113"   => 4,
+            "122"   => 3,
+            "1112"  => 2,
+            "11111" => 1,
+            ""      => 7,
+            _       => 0
         }
     }
 }
 
-fn get_joker_count(map: &HashMap<char, u64>) -> u64 {
-    return *map.get(&'J').unwrap_or(&0)
-}
-
-fn max_k_v(map: &HashMap<char, u64>) -> char {
+fn highest_non_joker_card(map: &HashMap<char, u64>) -> char {
     let mut max_k = &' ';
     let mut max_v = &0;
     for (k, v) in map {
