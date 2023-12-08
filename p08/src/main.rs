@@ -7,11 +7,11 @@ type Route = HashMap<String, (String, String)>;
 
 fn main() {
     let (lr, route) = parse("input");
-    println!("p1: {:?}", part1(&route, &lr, "AAA", "ZZZ"));
+    println!("p1: {:?}", navigate(&route, &lr, "AAA", "ZZZ").unwrap());
     println!("p2: {:?}", part2(&route, &lr));
 }
 
-fn part1(route: &Route, lr: &String, from: &str, to: &str) -> u64 {
+fn navigate(route: &Route, lr: &String, from: &str, to: &str) -> Option<u64> {
     let mut i = 0;
     let mut c = lr.chars().cycle();
     let mut start = from;
@@ -19,9 +19,10 @@ fn part1(route: &Route, lr: &String, from: &str, to: &str) -> u64 {
     while start != to {
         let dir = c.next().unwrap();
         let (l, r) = route.get(start).unwrap();
+        // TODO:
+        // This is a bit of an ugly hack ... but it works ;)
         if i as usize > (lr.len().pow(2)) + 1 {
-            i = 0;
-            break
+            return None
         }
 
         if dir == 'L' {
@@ -31,7 +32,7 @@ fn part1(route: &Route, lr: &String, from: &str, to: &str) -> u64 {
         }
         i += 1;
     }
-    i
+    Some(i)
 }
 
 fn part2(route: &Route, lr: &String) -> u64 {
@@ -48,8 +49,7 @@ fn part2(route: &Route, lr: &String) -> u64 {
     let mut t = vec![];
     for s in &starts {
         for e in &ends {
-            let n = part1(route, lr, s, e);
-            if n > 0 {
+            if let Some(n) = navigate(route, lr, s, e) {
                 t.push(n)
             }
         }
@@ -90,11 +90,11 @@ fn test_parse() {
 }
 
 #[test]
-fn test_part1() {
+fn test_navigate() {
     let (lr, route) = parse("test_input");
-    assert_eq!(part1(&route, &lr, "AAA", "ZZZ"), 2);
+    assert_eq!(navigate(&route, &lr, "AAA", "ZZZ"), Some(2));
     let (lr, route) = parse("test_input2");
-    assert_eq!(part1(&route, &lr, "AAA", "ZZZ"), 6);
+    assert_eq!(navigate(&route, &lr, "AAA", "ZZZ"), Some(6));
 }
 
 #[test]
