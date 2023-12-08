@@ -1,3 +1,4 @@
+use num_integer::lcm;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use std::collections::HashMap;
@@ -6,20 +7,25 @@ type Route = HashMap<String, (String, String)>;
 
 fn main() {
     let (lr, route) = parse("input");
-    println!("p1: {:?}", part1(&route, &lr));
+    println!("p1: {:?}", part1(&route, &lr, "AAA", "ZZZ"));
     println!("p2: {:?}", part2(&route, &lr));
 }
 
-fn part1(route: &Route, lr: &String) -> u64 {
+fn part1(route: &Route, lr: &String, from: &str, to: &str) -> u64 {
     let mut i = 0;
     let mut c = lr.chars().cycle();
-    let mut start = "AAA";
+    let mut start = from;
 
-    while start != "ZZZ" {
+    while start != to {
         let dir = c.next().unwrap();
         let (l, r) = route.get(start).unwrap();
+        if i as usize > (lr.len().pow(2)) + 1 {
+            i = 0;
+            break
+        }
+
         if dir == 'L' {
-            start =  l;
+            start = l;
         } else if dir == 'R' {
             start = r;
         }
@@ -29,28 +35,27 @@ fn part1(route: &Route, lr: &String) -> u64 {
 }
 
 fn part2(route: &Route, lr: &String) -> u64 {
-    let mut i = 0;
-    let mut c = lr.chars().cycle();
-
-    let mut starts: Vec<&String> = route
+    let starts: Vec<&String> = route
         .keys()
         .filter(|n| n.ends_with("A"))
         .collect();
 
-    while !starts.iter().all(|n| n.ends_with("Z")) {
-        let dir = c.next().unwrap();
-        for s in starts.iter_mut() {
-            let key = s.clone();
-            let (l, r) = route.get(&key).unwrap();
-            if dir == 'L' {
-                *s = l;
-            } else if dir == 'R' {
-                *s = r;
+    let ends: Vec<&String> = route
+        .keys()
+        .filter(|n| n.ends_with("Z"))
+        .collect();
+
+    let mut t = vec![];
+    for s in &starts {
+        for e in &ends {
+            let n = part1(route, lr, s, e);
+            if n > 0 {
+                t.push(n)
             }
         }
-        i += 1;
     }
-    i
+
+    t.iter().fold(1, |acc, &x| lcm(acc, x))
 }
 
 fn parse(input: &'static str) -> (String, Route) {
@@ -87,9 +92,9 @@ fn test_parse() {
 #[test]
 fn test_part1() {
     let (lr, route) = parse("test_input");
-    assert_eq!(part1(&route, &lr), 2);
+    assert_eq!(part1(&route, &lr, "AAA", "ZZZ"), 2);
     let (lr, route) = parse("test_input2");
-    assert_eq!(part1(&route, &lr), 6);
+    assert_eq!(part1(&route, &lr, "AAA", "ZZZ"), 6);
 }
 
 #[test]
