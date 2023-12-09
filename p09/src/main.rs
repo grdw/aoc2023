@@ -31,17 +31,18 @@ fn make_ends(history: &History) -> (History, History) {
     for line in history {
         let mut l = vec![];
         let mut r = vec![];
-        let mut differences = line.clone();
+        let mut diffs = line.clone();
 
         loop {
-            l.push(differences[0]);
-            r.push(differences[differences.len() - 1]);
+            let li = diffs.len() - 1;
+            l.push(diffs[0]);
+            r.push(diffs[li]);
 
-            differences = (0..(differences.len() - 1))
-                .map(|i| differences[i + 1] - differences[i])
+            diffs = (0..li)
+                .map(|i| diffs[i + 1] - diffs[i])
                 .collect();
 
-            if differences.iter().all(|&n| n == 0) {
+            if diffs.iter().all(|&n| n == 0) {
                 break
             }
         }
@@ -57,8 +58,11 @@ fn parse(input: &'static str) -> History {
     let lines = BufReader::new(file).lines();
 
     lines.map(|line| {
-        let l = line.unwrap();
-        l.split_whitespace().map(|n| n.parse::<i32>().unwrap()).collect()
+        line
+            .unwrap()
+            .split_whitespace()
+            .map(|n| n.parse::<i32>().unwrap())
+            .collect()
     }).collect()
 }
 
