@@ -5,32 +5,51 @@ type History = Vec<Vec<i32>>;
 
 fn main() {
     let history = parse("input");
-    println!("p1: {:?}", part1(&history));
-    println!("p2: {:?}", part2(&history));
+    let (lefts, rights) = make_ends(&history);
+    println!("p1: {:?}", part1(&rights));
+    println!("p2: {:?}", part2(&lefts));
 }
 
 fn part1(history: &History) -> i32 {
     history
         .iter()
-        .map(|line| {
-            let mut ends = vec![line[line.len() - 1]];
-            let mut differences = line.clone();
-
-            while !differences.iter().all(|&n| n == 0) {
-                let mut a = vec![];
-                for i in 0..(differences.len() - 1) {
-                    a.push(differences[i + 1] - differences[i]);
-                }
-                differences = a;
-                ends.push(differences[differences.len() - 1]);
-            }
-
-            ends.iter().sum::<i32>()
-        }).sum::<i32>()
+        .map(|h| h.iter().sum::<i32>())
+        .sum::<i32>()
 }
 
 fn part2(history: &History) -> i32 {
-    0
+    history
+        .iter()
+        .map(|h| h.iter().rev().fold(0, |acc, x| x - acc))
+        .sum::<i32>()
+}
+
+fn make_ends(history: &History) -> (History, History) {
+    let mut lefts = vec![];
+    let mut rights = vec![];
+
+    for line in history {
+        let mut l = vec![];
+        let mut r = vec![];
+        let mut differences = line.clone();
+
+        loop {
+            l.push(differences[0]);
+            r.push(differences[differences.len() - 1]);
+
+            differences = (0..(differences.len() - 1))
+                .map(|i| differences[i + 1] - differences[i])
+                .collect();
+
+            if differences.iter().all(|&n| n == 0) {
+                break
+            }
+        }
+        lefts.push(l);
+        rights.push(r);
+    }
+
+    (lefts, rights)
 }
 
 fn parse(input: &'static str) -> History {
@@ -52,11 +71,13 @@ fn test_parse() {
 #[test]
 fn test_part1() {
     let history = parse("test_input");
-    assert_eq!(part1(&history), 114);
+    let (_, rights) = make_ends(&history);
+    assert_eq!(part1(&rights), 114);
 }
 
 #[test]
 fn test_part2() {
     let history = parse("test_input");
-    assert_eq!(part2(&history), 114);
+    let (lefts, _) = make_ends(&history);
+    assert_eq!(part2(&lefts), 2);
 }
