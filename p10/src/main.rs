@@ -4,13 +4,19 @@ use std::collections::HashMap;
 
 fn main() {
     let grid = parse("input");
-    println!("p1: {}", furthest_point(&grid));
-    println!("p1: {}", part2(&grid));
+    let l_path = find_loop(&grid);
+    println!("p1: {}", furthest_point(&l_path));
+    println!("p1: {}", points_in_loop(&l_path));
 }
 
 type Grid = Vec<Vec<char>>;
+type Loop = Vec<(usize, usize)>;
 
-fn furthest_point(grid: &Grid) -> usize {
+fn furthest_point(l: &Loop) -> usize {
+    l.len() / 2
+}
+
+fn find_loop(grid: &Grid) -> Loop {
     let (mut startx, mut starty) = (0, 0);
 
     let parts = HashMap::from([
@@ -80,10 +86,10 @@ fn furthest_point(grid: &Grid) -> usize {
         }
     }
 
-    l_path.len() / 2
+    l_path
 }
 
-fn part2(grid: &Grid) -> u32 {
+fn points_in_loop(l: &Loop) -> u32 {
     0
 }
 
@@ -111,7 +117,9 @@ fn test_parse() {
 #[test]
 fn test_furthest_point() {
     let grid = parse("test_input2");
-    assert_eq!(furthest_point(&grid), 4);
+    let l_path = find_loop(&grid);
+    assert_eq!(furthest_point(&l_path), 4);
     let grid = parse("test_input");
-    assert_eq!(furthest_point(&grid), 8);
+    let l_path = find_loop(&grid);
+    assert_eq!(furthest_point(&l_path), 8);
 }
