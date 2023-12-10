@@ -1,3 +1,4 @@
+use std::cmp;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 use std::collections::HashMap;
@@ -6,7 +7,7 @@ fn main() {
     let grid = parse("input");
     let l_path = find_loop(&grid);
     println!("p1: {}", furthest_point(&l_path));
-    println!("p1: {}", points_in_loop(&l_path));
+    println!("p2: {}", points_in_loop(&l_path));
 }
 
 type Grid = Vec<Vec<char>>;
@@ -58,7 +59,7 @@ fn find_loop(grid: &Grid) -> Loop {
             let dy = ((sy as isize) + y) as usize;
 
             // Out of bounds
-            if dx > grid.len() || dy > grid.len() {
+            if dx > grid[0].len() || dy > grid.len() {
                 continue
             }
 
@@ -90,7 +91,65 @@ fn find_loop(grid: &Grid) -> Loop {
 }
 
 fn points_in_loop(l: &Loop) -> u32 {
-    0
+    let (mut minx, mut miny) = (usize::MAX, usize::MAX);
+    let (mut maxx, mut maxy) = (0, 0);
+    for (y, x) in l {
+        minx = cmp::min(minx, *x);
+        miny = cmp::min(miny, *y);
+        maxx = cmp::max(maxx, *x);
+        maxy = cmp::max(maxy, *y);
+    }
+
+    let mut count_grid: Vec<Vec<usize>> = vec![];
+    for _ in 0..=maxy {
+        let mut v = vec![];
+        for _ in 0..=maxx {
+            v.push(0);
+        }
+        count_grid.push(v);
+    }
+
+    let mut count = 0;
+    let diffs: Vec<(isize, isize)> = vec![(-1, 0),(0, -1),(0, 1),(1, 0)];
+    println!("=====");
+
+    for y in miny..=maxy {
+        for x in minx..=maxx {
+            if l.iter().any(|(ly, lx)| ly == &y && lx == &x) {
+                continue
+            }
+
+            println!("{} {}", y, x);
+            for (dy, dx) in &diffs {
+                let dx = ((x as isize) + dx) as usize;
+                let dy = ((y as isize) + dy) as usize;
+
+                // Out of bounds
+                if dx > maxx || dy > maxy {
+                    continue
+                }
+
+                count_grid[y][x] += l.iter()
+                    .filter(|(ly, lx)| ly == &dy && lx == &dx)
+                    .count();
+            }
+        }
+    }
+
+    println!("=====");
+    for g in &count_grid {
+        println!("{:?}", g);
+    }
+
+    for g in &count_grid {
+        for y in g {
+            if y > &2 {
+                count += 1;
+            }
+        }
+    }
+
+    count
 }
 
 fn parse(input: &'static str) -> Grid {
@@ -119,7 +178,26 @@ fn test_furthest_point() {
     let grid = parse("test_input2");
     let l_path = find_loop(&grid);
     assert_eq!(furthest_point(&l_path), 4);
+
     let grid = parse("test_input");
     let l_path = find_loop(&grid);
     assert_eq!(furthest_point(&l_path), 8);
+}
+
+#[test]
+fn test_points_in_loop() {
+    let grid = parse("test_input3");
+    let l_path = find_loop(&grid);
+    assert_eq!(points_in_loop(&l_path), 4);
+
+    let grid = parse("test_input5");
+    let l_path = find_loop(&grid);
+    assert_eq!(points_in_loop(&l_path), 4);
+}
+
+#[test]
+fn breaky() {
+    let grid = parse("test_input4");
+    let l_path = find_loop(&grid);
+    assert_eq!(points_in_loop(&l_path), 8);
 }
