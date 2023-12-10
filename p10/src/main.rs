@@ -138,7 +138,14 @@ fn points_in_loop(l: &Loop) -> u32 {
 
     println!("=====");
     for g in &count_grid {
-        println!("{:?}", g);
+        for y in g {
+            if y == &0 {
+                print!("{}", ".");
+            } else {
+                print!("{:?}", y);
+            }
+        }
+        println!("")
     }
 
     for g in &count_grid {
@@ -193,10 +200,7 @@ fn test_points_in_loop() {
     let grid = parse("test_input5");
     let l_path = find_loop(&grid);
     assert_eq!(points_in_loop(&l_path), 4);
-}
 
-#[test]
-fn breaky() {
     let grid = parse("test_input4");
     let l_path = find_loop(&grid);
     assert_eq!(points_in_loop(&l_path), 8);
