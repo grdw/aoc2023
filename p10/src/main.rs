@@ -50,10 +50,14 @@ fn furthest_point(grid: &Grid) -> usize {
         'outer: for (y, x) in &parts[&current_part] {
             let dx = ((sx as isize) + x) as usize;
             let dy = ((sy as isize) + y) as usize;
+
+            // Out of bounds
             if dx > grid.len() || dy > grid.len() {
                 continue
             }
 
+            // Same point as the last one
+            // There's probably something clever to be done here..
             if index > 0 {
                 let (prevy, prevx) = l_path[index - 1];
                 if prevy == dy && prevx == dx {
