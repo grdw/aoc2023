@@ -5,11 +5,15 @@ type Grid = Vec<Vec<char>>;
 
 fn main() {
     let mut grid = parse("input");
-    println!("p1: {}", total_load(&mut grid));
-    //println!("p2: {}", points_in_loop(&l_path));
+    tumble(&mut grid);
+    println!("p1: {}", total_load(&grid));
+
+    let mut grid = parse("input");
+    tumble_directional(&mut grid);
+    println!("p2: {}", total_load(&grid));
 }
 
-fn total_load(grid: &mut Grid) -> usize {
+fn tumble(grid: &mut Grid) {
     let mut rocks: Vec<(usize, usize)> = vec![];
     for (y, yrow) in grid.iter().enumerate() {
         for (x, o) in yrow.iter().enumerate() {
@@ -32,7 +36,67 @@ fn total_load(grid: &mut Grid) -> usize {
             grid[n][x] = 'O';
         }
     }
+}
 
+fn tumble_directional(grid: &mut Grid) {
+    let mut rocks: Vec<(usize, usize)> = vec![];
+    for (y, yrow) in grid.iter().enumerate() {
+        for (x, o) in yrow.iter().enumerate() {
+            if o == &'O' {
+                rocks.push((y, x));
+            }
+        }
+    }
+
+    let directions = ['N', 'W', 'S', 'E'];
+    let height = grid.len();
+    let width = grid[0].len();
+
+    for _ in 0..1 {
+        for d in directions {
+            for (y, x) in &rocks {
+                let mut nx = *x;
+                let mut ny = *y;
+
+                loop {
+                    let premise = match d {
+                        'N' => ny >= height - 1,
+                        'W' => nx == 0,
+                        'E' => nx >= width - 1,
+                        'S' => ny == 0,
+                        _ => false
+                    };
+
+                    if premise {
+                        break;
+                    }
+
+                    //if grid[ny][nx] == 'O' || grid[ny][nx] == '#' {
+                    //    break;
+                    //}
+
+                    grid[ny][nx] = '.';
+                    match d {
+                        'N' => ny += 1,
+                        'W' => nx -= 1,
+                        'S' => ny -= 1,
+                        'E' => nx += 1,
+                        _ => panic!("invalid")
+                    }
+                    grid[ny][nx] = 'O';
+                }
+            }
+
+            println!("============= {}", d);
+            for g in &*grid {
+                println!("{}", g.iter().collect::<String>());
+            }
+        }
+
+    }
+}
+
+fn total_load(grid: &Grid) -> usize {
     grid.iter().enumerate().map(|(n, g)| {
         g.iter().filter(|&&n| n == 'O').count() * (grid.len() - n)
     }).sum::<usize>()
@@ -62,5 +126,13 @@ fn test_parse() {
 #[test]
 fn test_total_load() {
     let mut grid = parse("test_input");
+    tumble(&mut grid);
     assert_eq!(total_load(&mut grid), 136);
+}
+
+#[test]
+fn test_total_load_tumble_dir() {
+    let mut grid = parse("test_input");
+    tumble_directional(&mut grid);
+    assert_eq!(total_load(&mut grid), 64);
 }
