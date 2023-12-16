@@ -1,4 +1,3 @@
-use itertools::Itertools;
 use std::fs::File;
 use std::io::{BufReader, BufRead};
 
@@ -8,74 +7,97 @@ struct SpringCondition {
     group: Vec<u8>
 }
 
+impl SpringCondition {
+    fn multiply(&mut self) {
+        let mut n = vec![];
+        let mut p = vec![];
+        for _ in 0..5 {
+            n.push(self.template.clone());
+
+            for n in &self.group {
+                p.push(*n);
+            }
+        }
+
+        self.template = n.join("?");
+        self.group = p;
+    }
+}
+
 fn main() {
-    let spring_conditions = parse("input");
+    let mut spring_conditions = parse("input");
     println!("p1: {}", combinations(&spring_conditions));
-    //println!("p2: {}", points_in_loop(&l_path));
+    for s in spring_conditions.iter_mut() {
+        s.multiply();
+    }
+    println!("p2: {}", combinations(&spring_conditions));
 }
 
 fn combination(s: &SpringCondition) -> u32 {
-    let v: Vec<_> = s.template.match_indices('?').collect();
     let mut t = 0;
-    //let mut new_s: Vec<char> = s.template.chars().collect();
-
     let mut dot_group = vec![0];
     for _ in 0..(s.group.len() - 1) {
         dot_group.push(1);
     }
+
     dot_group.push(0);
+    let total_chars = dot_group.iter().sum::<u8>() +
+        s.group.iter().sum::<u8>();
 
-    let total_chars = dot_group.iter().sum::<u8>() + s.group.iter().sum::<u8>();
+    let total = s.template.len() - total_chars as usize;
+    let num_sockets = dot_group.len();
+    let mut combination = vec![0; num_sockets];
+    let last_index = num_sockets - 1;
 
-    // in this case there's no need to check anything as there's only
-    // one configuration that works
-    if total_chars as usize == s.template.len() {
-        return 1
+    println!("{} {} {}", s.template, last_index, total);
+    loop {
+        // Process the current combination
+        if combination.iter().sum::<usize>() == total {
+            let mut g = String::new();
+            let mut i = 0;
+
+            while i < dot_group.len() {
+                g.push_str(&".".repeat(combination[i] + dot_group[i] as usize));
+                if let Some(n) = s.group.get(i) {
+                    g.push_str(&"#".repeat(*n as usize));
+                }
+
+                i+=1;
+            }
+
+            let mut m = true;
+            for (i, c) in s.template.chars().enumerate() {
+                if c == '?' {
+                    continue
+                }
+
+                if g.chars().nth(i) != Some(c) {
+                    m = false;
+                    break;
+                }
+            }
+            if m {
+                t += 1;
+            }
+        }
+
+        // Find the rightmost element that can be incremented
+        let mut i = last_index;
+        while i > 0 && (combination[i] == total) {
+            i -= 1;
+        }
+
+        // Increment the rightmost element
+        combination[i] += 1;
+
+        for j in (i + 1)..num_sockets {
+            combination[j] = 0;
+        }
+
+        if combination[0] > total {
+            break;
+        }
     }
-
-    println!("dots: {:?} bonqs: {:?}", dot_group, s.group);
-    println!("{} | {}", s.template, s.template.len());
-    let dots_to_give = s.template.len() - total_chars as usize;
-    let mut result = Vec::new();
-    println!("{}", dots_to_give);
-    for combination in result {
-        println!("{:?}", combination);
-    }
-    println!("");
-
-    //for n in 0..x {
-    //    let f = format!("{:0>width$b}", n, width = v.len());
-    //    let mut n = 0;
-    //    let mut pattern = vec![];
-
-    //    for i in 0..v.len() {
-    //        let p = f.chars().nth(i).unwrap_or('0');
-    //        let q = match p {
-    //            '1' => '#',
-    //            '0' => '.',
-    //            _ => panic!("boom")
-    //        };
-
-    //        let j = v[i].0;
-    //        new_s[j] = q
-    //    }
-
-    //    for s in 0..=new_s.len() {
-    //        let c = new_s.get(s).unwrap_or(&'.');
-    //        if c == &'#' {
-    //            n += 1
-    //        } else {
-    //            if n > 0 {
-    //                pattern.push(n);
-    //            }
-    //            n = 0;
-    //        }
-    //    }
-
-    //    if pattern == s.group {
-    //        t += 1
-    //    }
-    //}
 
     t
 }
@@ -111,15 +133,15 @@ fn test_parse() {
 #[test]
 fn test_combinations_indiv() {
     let sp = SpringCondition {
-        template: String::from("???.###"),
-        group: vec![1,1,3]
-    };
-    assert_eq!(combination(&sp), 1);
-    let sp = SpringCondition {
         template: String::from("?###????????"),
         group: vec![3,2,1]
     };
     assert_eq!(combination(&sp), 10);
+    let sp = SpringCondition {
+        template: String::from("???.###"),
+        group: vec![1,1,3]
+    };
+    assert_eq!(combination(&sp), 1);
 }
 
 #[test]
